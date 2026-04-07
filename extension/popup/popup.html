@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Article Study</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 320px;
+      font-family: 'Segoe UI', -apple-system, sans-serif;
+      background: #FAFBFC;
+      color: #2D3436;
+    }
+    .popup-header {
+      padding: 18px 20px 14px;
+      background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+      color: white;
+    }
+    .popup-header h1 { font-size: 18px; font-weight: 700; }
+    .popup-header p { font-size: 12px; opacity: 0.85; margin-top: 4px; }
+    .popup-status {
+      padding: 14px 20px;
+      background: white;
+      border-bottom: 1px solid #E8ECF0;
+    }
+    .popup-status__item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+    .popup-status__dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+    .popup-status__dot--ok { background: #00B894; }
+    .popup-status__dot--err { background: #FF7675; }
+    .popup-status__dot--warn { background: #FDCB6E; }
+    .popup-doc {
+      padding: 14px 20px;
+      background: white;
+      border-bottom: 1px solid #E8ECF0;
+    }
+    .popup-doc__title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #6C5CE7;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .popup-doc__info { font-size: 12px; color: #636E72; margin-top: 4px; }
+    .popup-actions { padding: 14px 20px; }
+    .popup-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      border: 1px solid #E8ECF0;
+      border-radius: 10px;
+      background: white;
+      font-family: inherit;
+      font-size: 13px;
+      color: #2D3436;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+    .popup-btn:hover {
+      border-color: #A29BFE;
+      background: rgba(108, 92, 231, 0.04);
+    }
+    .popup-footer {
+      padding: 10px 20px 14px;
+      text-align: center;
+      font-size: 11px;
+      color: #B2BEC3;
+    }
+    .popup-footer a {
+      color: #6C5CE7;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="popup-header">
+    <h1>📚 Article Study</h1>
+    <p>AI 논문 학습 어시스턴트</p>
+  </div>
+
+  <div class="popup-status" id="status-section">
+    <div class="popup-status__item">
+      <div class="popup-status__dot popup-status__dot--warn" id="server-dot"></div>
+      <span id="server-status">서버 확인중...</span>
+    </div>
+    <div class="popup-status__item">
+      <div class="popup-status__dot popup-status__dot--warn" id="ollama-dot"></div>
+      <span id="ollama-status">Ollama 확인중...</span>
+    </div>
+  </div>
+
+  <div class="popup-doc" id="doc-section" style="display:none">
+    <div class="popup-doc__title" id="doc-title"></div>
+    <div class="popup-doc__info" id="doc-info"></div>
+  </div>
+
+  <div class="popup-actions">
+    <button class="popup-btn" id="btn-docs">📄 학습된 논문 목록</button>
+    <button class="popup-btn" id="btn-options">⚙️ 설정</button>
+  </div>
+
+  <div class="popup-footer">
+    Article Study v1.0.0 · <a href="#" id="btn-docs-link">API Docs</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

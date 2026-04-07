@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Article Study — 설정</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', -apple-system, sans-serif;
+      background: #F5F6FA;
+      color: #2D3436;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    h1 {
+      font-size: 24px;
+      background: linear-gradient(135deg, #6C5CE7, #00CEC9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    h1 + p { color: #636E72; font-size: 14px; margin-bottom: 32px; }
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      border: 1px solid #E8ECF0;
+    }
+    .section h2 { font-size: 16px; margin-bottom: 16px; color: #6C5CE7; }
+    .field { margin-bottom: 16px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #2D3436;
+    }
+    .field label small { font-weight: 400; color: #636E72; }
+    .field input, .field select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #E8ECF0;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field select:focus {
+      border-color: #6C5CE7;
+    }
+    .btn-save {
+      display: inline-block;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+      color: white;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-save:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      background: #00B894;
+      color: white;
+      font-size: 14px;
+      animation: fadeIn 0.3s;
+      display: none;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <h1>⚙️ Article Study 설정</h1>
+  <p>확장 프로그램 동작을 커스터마이징합니다</p>
+
+  <div class="section">
+    <h2>🔗 서버 연결</h2>
+    <div class="field">
+      <label>API 서버 주소 <small>(기본: http://localhost:8765)</small></label>
+      <input type="text" id="opt-server" value="http://localhost:8765">
+    </div>
+    <div class="field">
+      <label>Ollama 주소 <small>(기본: http://localhost:11434)</small></label>
+      <input type="text" id="opt-ollama" value="http://localhost:11434">
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🌐 번역</h2>
+    <div class="field">
+      <label>기본 번역 언어</label>
+      <select id="opt-lang">
+        <option value="ko" selected>한국어</option>
+        <option value="ja">日本語</option>
+        <option value="zh">中文</option>
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+        <option value="fr">Français</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎨 디스플레이</h2>
+    <div class="field">
+      <label>팝업 폰트 크기 (px)</label>
+      <input type="number" id="opt-fontsize" value="14" min="10" max="24">
+    </div>
+    <div class="field">
+      <label>테마</label>
+      <select id="opt-theme">
+        <option value="light" selected>라이트</option>
+        <option value="dark">다크</option>
+        <option value="auto">시스템 설정 따름</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn-save" id="btn-save">💾 설정 저장</button>
+
+  <div class="toast" id="toast">✅ 설정이 저장되었습니다</div>
+
+  <script src="options.js"></script>
+</body>
+</html>

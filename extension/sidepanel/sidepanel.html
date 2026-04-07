@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article Study</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="sp-header">
+    <div class="sp-header__logo">📚 Article Study</div>
+    <div class="sp-header__tabs">
+      <button class="sp-tab active" data-tab="chat"><span class="sp-tab__icon">💬</span><span class="sp-tab__label">AI 질문</span></button>
+      <button class="sp-tab" data-tab="vocab"><span class="sp-tab__icon">🔤</span><span class="sp-tab__label">단어장</span></button>
+      <button class="sp-tab" data-tab="docs"><span class="sp-tab__icon">📜</span><span class="sp-tab__label">학습 기록</span></button>
+      <button class="sp-tab" data-tab="briefing"><span class="sp-tab__icon">🎯</span><span class="sp-tab__label">브리핑</span></button>
+      <button class="sp-tab" data-tab="notes"><span class="sp-tab__icon">📝</span><span class="sp-tab__label">노트</span></button>
+    </div>
+  </header>
+  
+  <!-- Status Box (Progress) -->
+  <div id="status-box" class="sp-status-box hidden">
+    <div class="sp-status-content">
+      <div class="sp-spinner sp-spinner--small"></div>
+      <span id="status-text">논문 학습 중...</span>
+    </div>
+    <div class="sp-progress-bar"><div id="progress-fill" class="sp-progress-fill"></div></div>
+  </div>
+
+
+  <!-- Chat Panel -->
+  <section id="panel-chat" class="sp-panel active">
+    <div class="sp-chat-header" style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--sp-border);">
+      <h3 style="margin:0; font-size:14px; color:var(--sp-text);">💬 AI 채팅</h3>
+      <button id="chat-clear-btn" class="sp-btn-icon" title="대화 초기화" style="cursor:pointer; background:none; border:none; font-size:16px;">🧹</button>
+    </div>
+    <div class="sp-chat-messages" id="chat-messages">
+      <div class="sp-chat-welcome">
+        <div class="sp-chat-welcome__icon">🤖</div>
+        <h3>논문에 대해 질문하세요</h3>
+        <p>학습된 논문 내용을 기반으로 답변합니다</p>
+      </div>
+    </div>
+    
+    <div id="chat-suggestions" style="display:none; padding:8px 16px; gap:6px; flex-direction:column; border-top: 1px solid var(--sp-border); background: var(--sp-bg-secondary);">
+    </div>
+    
+    <div class="sp-chat-input-area">
+      <textarea id="chat-input" placeholder="논문에 대해 궁금한 점을 질문하세요..." rows="2"></textarea>
+      <button id="chat-send" class="sp-btn-primary">전송</button>
+    </div>
+  </section>
+
+  <!-- Vocabulary Panel -->
+  <section id="panel-vocab" class="sp-panel">
+    <div class="sp-vocab-header">
+      <h3>🔤 스마트 단어장</h3>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button id="vocab-export-csv" class="sp-btn-outline" title="모든 단어를 CSV로 저장">📥 CSV 내보내기</button>
+        <button id="vocab-clear-btn" class="sp-btn-icon" title="현재 논문 단어장 모두 지우기" style="cursor:pointer; background:none; border:none; font-size:16px;">🧹</button>
+      </div>
+    </div>
+    <div class="sp-vocab-list" id="vocab-list">
+      <div class="sp-empty-state">
+        <div style="font-size:48px;margin-bottom:12px;">📝</div>
+        <p>논문에서 단어를 선택하면 자동으로 추가됩니다</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Documents Panel -->
+  <section id="panel-docs" class="sp-panel">
+    <div class="sp-docs-header">
+      <h3>📜 학습된 논문 기록</h3>
+      <p>과거에 학습한 논문 목록을 관리합니다</p>
+    </div>
+    <div class="sp-docs-list" id="docs-list">
+      <div class="sp-empty-state">
+        <div style="font-size:48px;margin-bottom:12px;">📂</div>
+        <p>학습된 논문이 없습니다</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Briefing Panel -->
+  <section id="panel-briefing" class="sp-panel">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--sp-border);">
+      <select id="briefing-lang" style="padding:4px 8px; border-radius:4px; border:1px solid var(--sp-border); background:var(--sp-bg-secondary); color:var(--sp-text);">
+        <option value="ko">한국어 (기본)</option>
+        <option value="en">English</option>
+      </select>
+      <button id="briefing-clear-btn" class="sp-btn-icon" title="브리핑 초기화" style="cursor:pointer; background:none; border:none; font-size:16px;">🧹</button>
+    </div>
+    <div class="sp-briefing-container" id="briefing-container">
+      <div class="sp-empty-state">
+        <div style="font-size:48px;margin-bottom:12px;">🎯</div>
+        <p>논문 브리핑을 생성합니다</p>
+        <button id="briefing-generate" class="sp-btn-primary" style="margin-top:16px;">브리핑 생성</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Notes Panel -->
+  <section id="panel-notes" class="sp-panel">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--sp-border);">
+      <h3 style="margin:0; font-size:14px; color:var(--sp-text);">📝 학습 노트</h3>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button id="notes-export-pdf" class="sp-btn-outline" title="노트를 PDF로 내보내기">📄 PDF</button>
+        <button id="notes-clear-btn" class="sp-btn-icon" title="노트 초기화" style="cursor:pointer; background:none; border:none; font-size:16px;">🧹</button>
+      </div>
+    </div>
+    <div class="sp-notes-container" id="notes-container">
+      <!-- Notes will be rendered here -->
+    </div>
+  </section>
+
+  <script src="../libs/html2canvas.min.js"></script>
+  <script src="../libs/jspdf.umd.min.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
