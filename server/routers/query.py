@@ -70,7 +70,11 @@ Now analyze "{req.word}":
 
 Output ONLY valid JSON, nothing else."""
 
-        result = await llm_service.generate(prompt=prompt)
+        result = await llm_service.generate(
+            prompt=prompt, 
+            model=req.model_name, 
+            openrouter_model=req.openrouter_model
+        )
 
         # Parse JSON from response
         try:
@@ -146,7 +150,10 @@ Now analyze the selected sentence:
 
 Output ONLY valid JSON, nothing else."""
 
-        result = await llm_service.generate(prompt=prompt)
+        result = await llm_service.generate(
+            prompt=prompt, 
+            model="gemma3:1b"
+        )
 
         try:
             cleaned = result.strip()
@@ -197,7 +204,12 @@ async def chat_with_paper(req: ChatRequest):
 
         if not req.stream:
             # ── Non-streaming JSON mode ──
-            result = await llm_service.chat(messages=messages, system=SYSTEM_PROMPT)
+            result = await llm_service.chat(
+                messages=messages, 
+                system=SYSTEM_PROMPT,
+                model_name=req.model_name,
+                openrouter_model=req.openrouter_model
+            )
             return {"answer": result}
 
         # ── True Streaming SSE mode ──
@@ -206,6 +218,8 @@ async def chat_with_paper(req: ChatRequest):
                 stream = llm_service.chat_stream(
                     messages=messages,
                     system=SYSTEM_PROMPT,
+                    model_name=req.model_name,
+                    openrouter_model=req.openrouter_model
                 )
                 async for token in stream:
                     yield {"event": "token", "data": token}
@@ -301,6 +315,8 @@ async def generate_briefing(req: dict):
     """Generate a one-click paper briefing with a single LLM call."""
     doc_id = req.get("doc_id", "")
     language = req.get("language", "ko")
+    model_name = req.get("model_name", "gemma4:e2b")
+    openrouter_model = req.get("openrouter_model", "google/gemma-4-31b-it:free")
     if not doc_id:
         raise HTTPException(400, "doc_id required")
 
@@ -342,7 +358,11 @@ GSM8K 벤치마크에서 기존 방법 대비 12% 높은 정확도를 달성했�
 
         t0 = time.time()
         print(f"[Briefing] Starting single LLM call...", flush=True)
-        raw = await llm_service.generate(prompt=prompt)
+        raw = await llm_service.generate(
+            prompt=prompt,
+            model=model_name,
+            openrouter_model=openrouter_model
+        )
         print(f"[Briefing] LLM done ({time.time()-t0:.1f}s)", flush=True)
 
         # Strip markdown formatting

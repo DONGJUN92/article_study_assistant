@@ -31,6 +31,8 @@ class WordRequest(BaseModel):
     word: str
     context: str  # surrounding sentence(s)
     doc_id: str
+    model_name: Optional[str] = "gemma4:e2b"
+    openrouter_model: Optional[str] = "google/gemma-4-31b-it:free"
 
 class WordExample(BaseModel):
     sentence: str
@@ -50,6 +52,8 @@ class WordResponse(BaseModel):
 class SentenceRequest(BaseModel):
     sentence: str
     doc_id: str
+    model_name: Optional[str] = "gemma4:e2b"
+    openrouter_model: Optional[str] = "google/gemma-4-31b-it:free"
 
 class SentenceResponse(BaseModel):
     original: str
@@ -69,6 +73,8 @@ class ChatRequest(BaseModel):
     history: List[ChatMessage] = []
     language: str = "ko"
     stream: bool = True
+    model_name: Optional[str] = "gemma4:e2b"
+    openrouter_model: Optional[str] = "google/gemma-4-31b-it:free"
 
 class ChatResponse(BaseModel):
     answer: str
@@ -130,6 +136,8 @@ class VocabEntry(BaseModel):
     doc_id: str
     doc_title: str = ""
     added_at: str = ""
+    model_name: Optional[str] = "gemma4:e2b"
+    openrouter_model: Optional[str] = "google/gemma-4-31b-it:free"
 
 
 # ── Notes ──────────────────────────────────────────────
@@ -144,3 +152,5 @@ class NoteEvaluateRequest(BaseModel):
     doc_id: str
     content: str
     language: str = "ko"
+    model_name: Optional[str] = "gemma4:e2b"
+    openrouter_model: Optional[str] = "google/gemma-4-31b-it:free"

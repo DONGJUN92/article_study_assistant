@@ -39,7 +39,7 @@ async def get_vocabulary(doc_id: Optional[str] = None):
 
 from fastapi import BackgroundTasks
 
-async def _bg_generate_vocab(word: str, context: str, doc_id: str):
+async def _bg_generate_vocab(word: str, context: str, doc_id: str, model_name: str = "gemma4:e2b", openrouter_model: str = "google/gemma-4-31b-it:free"):
     try:
         prompt = f"""학술 단어의 의미를 한국어로 분석하세요.
 
@@ -56,7 +56,11 @@ async def _bg_generate_vocab(word: str, context: str, doc_id: str):
 [실제 분석]
 1. 일반적 의미: """
 
-        result = await llm_service.generate(prompt=prompt)
+        result = await llm_service.generate(
+            prompt=prompt,
+            model=model_name,
+            openrouter_model=openrouter_model
+        )
         
         import re
         text = result.strip()
@@ -101,7 +105,7 @@ async def add_vocabulary(entry: VocabEntry, background_tasks: BackgroundTasks):
     _save_vocab(entries)
 
     if needs_llm:
-        background_tasks.add_task(_bg_generate_vocab, entry.word, entry.context_sentence, entry.doc_id)
+        background_tasks.add_task(_bg_generate_vocab, entry.word, entry.context_sentence, entry.doc_id, entry.model_name, entry.openrouter_model)
 
     return VocabEntry(**new_entry)
 

@@ -7,7 +7,7 @@ from models.schemas import HealthResponse
 from services.llm_service import llm_service
 
 # ── Import routers ─────────────────────────────────────
-from routers import ingest, query, translate, vocabulary, notes
+from routers import ingest, query, translate, vocabulary, notes, ai_models
 
 # ── App ────────────────────────────────────────────────
 app = FastAPI(
@@ -42,6 +42,7 @@ app.include_router(query.router)
 app.include_router(translate.router)
 app.include_router(vocabulary.router)
 app.include_router(notes.router)
+app.include_router(ai_models.router)
 
 
 # ── Health check ──────────────────────────────────────

@@ -89,7 +89,11 @@ Input: "트랜스포머는 셀프 어텐션 메커니즘을 기반으로 한 시
 
 점수만 출력하세요 (1~10 사이 정수)."""
 
-        score_str = await llm_service.generate(prompt=p_score)
+        score_str = await llm_service.generate(
+            prompt=p_score,
+            model=req.model_name,
+            openrouter_model=req.openrouter_model
+        )
 
         # Parse score
         score_match = re.search(r'(\d+)', score_str.strip())
@@ -132,8 +136,8 @@ Input: "트랜스포머는 셀프 어텐션 메커니즘을 기반으로 한 시
 
         # Execute detail and summary in parallel
         detail_str, summary_str = await asyncio.gather(
-            llm_service.generate(prompt=p_detail),
-            llm_service.generate(prompt=p_summary),
+            llm_service.generate(prompt=p_detail, model=req.model_name, openrouter_model=req.openrouter_model),
+            llm_service.generate(prompt=p_summary, model=req.model_name, openrouter_model=req.openrouter_model),
         )
 
         # ─── Compose final feedback ───
