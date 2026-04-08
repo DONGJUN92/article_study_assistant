@@ -3,6 +3,7 @@ import httpx
 import asyncio
 from fastapi import APIRouter
 from typing import List, Dict
+from config import OPENROUTER_API_KEY
 
 router = APIRouter(prefix="/api", tags=["models"])
 
@@ -20,7 +21,7 @@ async def fetch_openrouter_free_models():
     # Using the standard openrouter key matching llm_service
     # If the user wants to bring their own key, they can via extension settings eventually.
     headers = {
-        "Authorization": "Bearer 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"
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}"
     }
 
     try:

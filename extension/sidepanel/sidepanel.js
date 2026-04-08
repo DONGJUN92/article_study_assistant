@@ -14,6 +14,67 @@ let isBriefingRunning = false;
 const statusBox = document.getElementById('status-box');
 const statusText = document.getElementById('status-text');
 const progressFill = document.getElementById('progress-fill');
+const modelSelect = document.getElementById('global-model-select');
+
+// ═══════════════════════════════════════════════════
+// MODEL SELECTION
+// ═══════════════════════════════════════════════════
+function renderModelSelect(data) {
+  const models = data.appliedModels || ['gemma3:1b', 'gemma4:e2b', 'kanana-o', 'solar-pro3'];
+  modelSelect.innerHTML = '';
+  
+  models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.textContent = m;
+    modelSelect.appendChild(opt);
+  });
+
+  if (data.selectedModel && data.selectedModel !== 'openrouter') {
+    if (models.includes(data.selectedModel)) {
+      modelSelect.value = data.selectedModel;
+    } else {
+      modelSelect.value = models[0];
+      // ensure we update storage if we defaulted
+      updateModelStorage(models[0]);
+    }
+  } else if (data.selectedModel === 'openrouter' && data.openrouterModel) {
+    if (models.includes(data.openrouterModel)) {
+      modelSelect.value = data.openrouterModel;
+    } else {
+      modelSelect.value = models[0];
+      updateModelStorage(models[0]);
+    }
+  } else if (models.length > 0) {
+    modelSelect.value = models[0];
+    updateModelStorage(models[0]);
+  }
+}
+
+chrome.storage.local.get(['selectedModel', 'openrouterModel', 'appliedModels'], (data) => {
+  renderModelSelect(data);
+});
+
+function updateModelStorage(val) {
+  if (['gemma3:1b', 'gemma4:e2b', 'solar-pro3', 'kanana-o'].includes(val)) {
+    chrome.storage.local.set({ selectedModel: val, openrouterModel: '' });
+  } else {
+    chrome.storage.local.set({ selectedModel: 'openrouter', openrouterModel: val });
+  }
+}
+
+modelSelect.addEventListener('change', (e) => {
+  updateModelStorage(e.target.value);
+});
+
+function getModelConfig() {
+  const val = modelSelect.value;
+  if (['gemma3:1b', 'gemma4:e2b', 'solar-pro3', 'kanana-o'].includes(val)) {
+    return { model_name: val, openrouter_model: '' };
+  } else {
+    return { model_name: 'openrouter', openrouter_model: val };
+  }
+}
 
 // ═══════════════════════════════════════════════════
 // TAB SWITCHING
@@ -154,6 +215,9 @@ async function loadPersistedState() {
 
 // Listen for storage changes while sidepanel is open
 chrome.storage.onChanged.addListener((changes) => {
+  if (changes.appliedModels) {
+    chrome.storage.local.get(['selectedModel', 'openrouterModel', 'appliedModels'], renderModelSelect);
+  }
   if (changes.pendingSelection || changes.panelMode || changes.currentDocId) {
     checkPendingActions();
   }
@@ -323,6 +387,7 @@ async function performChatQuery(query) {
     const lang = document.getElementById('briefing-lang')?.value || 'ko';
 
     // Call the API directly from the sidepanel (avoids service worker timeout)
+    const { model_name, openrouter_model } = getModelConfig();
     const resp = await fetch(`${API_BASE}/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -331,13 +396,18 @@ async function performChatQuery(query) {
         query: query,
         history: chatHistory.slice(-10),
         language: lang,
-        stream: false
+        stream: false,
+        model_name: model_name,
+        openrouter_model: openrouter_model
       })
     });
 
     if (!resp.ok) throw new Error(`API ${resp.status}`);
     const result = await resp.json();
-    const answer = result.answer || '';
+    let answer = result.answer || '';
+    
+    // 마크다운 제거
+    answer = stripMarkdown(answer);
 
     // Update UI
     const bubble = loadingEl.querySelector('.sp-chat-bubble');
@@ -617,10 +687,11 @@ async function generateBriefing() {
 
   try {
     // Call API directly from sidepanel (avoids service worker timeout)
+    const { model_name, openrouter_model } = getModelConfig();
     const resp = await fetch(`${API_BASE}/briefing`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ doc_id: currentDocId, language: lang })
+      body: JSON.stringify({ doc_id: currentDocId, language: lang, model_name, openrouter_model })
     });
 
     if (!resp.ok) {
@@ -910,10 +981,11 @@ async function evaluateNoteAsync(noteId, content) {
     const lang = document.getElementById('briefing-lang')?.value || 'ko';
     
     // Call API directly from sidepanel (avoids service worker timeout)
+    const { model_name, openrouter_model } = getModelConfig();
     const resp = await fetch(`${API_BASE}/notes/evaluate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ doc_id: currentDocId, content: content, language: lang })
+      body: JSON.stringify({ doc_id: currentDocId, content: content, language: lang, model_name, openrouter_model })
     });
 
     if (!resp.ok) {
@@ -1021,8 +1093,20 @@ async function exportNotesToPDF() {
 // ═══════════════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════════════
+function stripMarkdown(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/^#{1,6}\s+/gm, '') // Remove headers (e.g. ### Header)
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+    .replace(/__(.*?)__/g, '$1') // Remove bold
+    .replace(/\*(.*?)\*/g, '$1') // Remove italic
+    .replace(/_(.*?)_/g, '$1') // Remove italic
+    .replace(/`(.*?)`/g, '$1') // Remove inline code
+    .replace(/^[\-\*_]{3,}\s*$/gm, ''); // Remove horizontal rules
+}
+
 function escapeHtml(str) {
   const div = document.createElement('div');
-  div.textContent = str || '';
+  div.textContent = stripMarkdown(str) || '';
   return div.innerHTML;
 }

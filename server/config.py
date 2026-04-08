@@ -1,9 +1,11 @@
 """Article Study — Configuration"""
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # ── Paths ──────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
 DATA_DIR = BASE_DIR / "data"
 DOCUMENTS_DIR = DATA_DIR / "documents"
 RAG_DIR = DATA_DIR / "rag_storage"
@@ -31,3 +33,8 @@ RAG_TOP_K = int(os.getenv("RAG_TOP_K", "3"))
 
 # ── Translation ────────────────────────────────────────
 DEFAULT_TARGET_LANG = os.getenv("DEFAULT_TARGET_LANG", "ko")
+
+# ── API Keys ────────────────────────────────────────
+UPSTAGE_API_KEY = os.getenv("UPSTAGE_API_KEY", "")
+KAKAO_KANANA_API_KEY = os.getenv("KAKAO_KANANA_API_KEY", "")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")

@@ -7,7 +7,7 @@ from typing import AsyncIterator, List, Optional, Union, Tuple
 import httpx
 from openai import AsyncOpenAI
 
-from config import OLLAMA_BASE_URL, OLLAMA_MODEL
+from config import OLLAMA_BASE_URL, OLLAMA_MODEL, UPSTAGE_API_KEY, KAKAO_KANANA_API_KEY, OPENROUTER_API_KEY
 
 
 class LLMService:
@@ -19,19 +19,19 @@ class LLMService:
         
         # Initialize OpenAI clients with increased retries for stability
         self.solar_client = AsyncOpenAI(
-            api_key="up_fvxWTF1IA7tYS3vGcyk6s7cTCJi6x",
+            api_key=UPSTAGE_API_KEY,
             base_url="https://api.upstage.ai/v1",
-            max_retries=5
+            max_retries=3
         )
         self.kanana_client = AsyncOpenAI(
-            api_key="KC_IS_VzRaPJM9heTHOAWnw0lN96LkWzyE7Xm6qeauTSLL4QzfwIVhsJoSN6C4LPfnr9xF",
+            api_key=KAKAO_KANANA_API_KEY,
             base_url="https://kanana-o.a2s-endpoint.kr-central-2.kakaocloud.com/v1",
-            max_retries=5
+            max_retries=3
         )
         self.openrouter_client = AsyncOpenAI(
-            api_key="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",
+            api_key=OPENROUTER_API_KEY,
             base_url="https://openrouter.ai/api/v1",
-            max_retries=5
+            max_retries=0  # 재시도 지옥 방지: 타임아웃 시 즉시 실패 처리
         )
 
     def _get_provider(self, model_name: str, openrouter_model: str) -> Tuple[Optional[AsyncOpenAI], str, dict]:
@@ -40,7 +40,8 @@ class LLMService:
         elif model_name == "kanana-o":
             return self.kanana_client, "kanana-o", {}
         elif model_name == "openrouter":
-            return self.openrouter_client, openrouter_model, {"reasoning": {"enabled": True}}
+            # reasoning extra_body 제거: 무료 모델에서 추론 모드가 응답 시간을 급격히 늘림
+            return self.openrouter_client, openrouter_model, {}
         return None, model_name or self.model, {}
 
     async def check_health(self) -> bool:
@@ -63,7 +64,11 @@ class LLMService:
         model: Optional[str] = None,
         openrouter_model: str = "google/gemma-4-31b-it:free",
     ) -> str:
-        """Generate a non-streaming response."""
+        """Generate a non-streaming response.
+        
+        For cloud providers (OpenRouter, Solar, Kanana), streams internally to prevent
+        Cloudflare/proxy 524 timeout on long-running non-streaming requests.
+        """
         client, target_model, extra_body = self._get_provider(model or self.model, openrouter_model)
         
         if client:
@@ -78,12 +83,20 @@ class LLMService:
                 else:
                     messages.append({"role": "user", "content": prompt})
 
-                resp = await client.chat.completions.create(
+                # 클라우드 프로바이더는 내부 스트리밍으로 토큰을 수집 후 반환.
+                # Non-streaming 방식은 Cloudflare 프록시가 120초 내 응답 없으면
+                # TCP를 강제 종료하므로, stream=True로 타임아웃을 우회함.
+                collected = []
+                stream = await client.chat.completions.create(
                     model=target_model,
                     messages=messages,
+                    stream=True,
                     extra_body=extra_body if extra_body else None
                 )
-                return resp.choices[0].message.content or ""
+                async for chunk in stream:
+                    if chunk.choices and chunk.choices[0].delta.content:
+                        collected.append(chunk.choices[0].delta.content)
+                return "".join(collected)
             except Exception as e:
                 print(f"[LLMService] Error from OpenAI Provider ({target_model}): {e}")
                 return f"(일시적인 API 장애가 발생했습니다. 잠시 후 다시 시도해주세요. 원인: {str(e)})"

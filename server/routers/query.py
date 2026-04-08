@@ -331,7 +331,7 @@ async def generate_briefing(req: dict):
 반드시 아래 형식의 섹션 태그를 사용하세요.
 
 논문 내용:
-{full_text[:6000]}
+{full_text[:3500]}
 
 [모범 답안 예시]
 [난이도]

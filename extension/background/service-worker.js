@@ -43,7 +43,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     const text = info.selectionText.trim();
     if (!text) return;
 
-    const res = await chrome.storage.local.get(['currentDocId', 'pendingVocab']);
+    const res = await chrome.storage.local.get(['currentDocId', 'pendingVocab', 'selectedModel', 'openrouterModel']);
     const pending = res.pendingVocab || [];
     if (!pending.includes(text)) {
       pending.push(text);
@@ -57,7 +57,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       word: text,
       meaning: '',
       context_sentence: text,
-      doc_id: res.currentDocId || null
+      doc_id: res.currentDocId || null,
+      model_name: res.selectedModel || 'gemma4:e2b',
+      openrouter_model: res.openrouterModel || 'google/gemma-4-31b-it:free'
     });
 
     // Remove from pending

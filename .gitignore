@@ -1,3 +1,5 @@
-﻿venv/
+venv/
 server/venv/
 server/venv/
+*.env
+.env

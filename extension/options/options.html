@@ -17,6 +17,7 @@
       font-size: 24px;
       background: linear-gradient(135deg, #6C5CE7, #00CEC9);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 8px;
     }
@@ -97,6 +98,27 @@
     <div class="field">
       <label>Ollama 주소 <small>(기본: http://localhost:11434)</small></label>
       <input type="text" id="opt-ollama" value="http://localhost:11434">
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🤖 AI 모델</h2>
+    <div style="display: flex; gap: 16px; align-items: stretch; margin-top: 12px;">
+      <div style="flex: 1;">
+        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">적용 가능한 AI 리스트</label>
+        <select id="available-models" multiple style="width:100%; height:180px; padding:8px; border:1px solid #E8ECF0; border-radius:8px; font-family:inherit; outline:none; background:white; cursor:pointer; font-size:13px; overflow-y:auto;"></select>
+      </div>
+      <div style="display: flex; flex-direction: column; justify-content: center; gap: 8px;">
+        <button id="btn-add" style="padding: 8px 12px; cursor: pointer; border: 1px solid #E8ECF0; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s;" title="우측으로 이동">▶</button>
+        <button id="btn-remove" style="padding: 8px 12px; cursor: pointer; border: 1px solid #E8ECF0; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s;" title="좌측으로 이동">◀</button>
+      </div>
+      <div style="flex: 1;">
+        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">적용한 AI 리스트</label>
+        <select id="applied-models" multiple style="width:100%; height:180px; padding:8px; border:1px solid #E8ECF0; border-radius:8px; font-family:inherit; outline:none; background:white; cursor:pointer; font-size:13px; overflow-y:auto;"></select>
+      </div>
+    </div>
+    <div style="margin-top: 8px; text-align: right;">
+        <button id="btn-refresh-models" style="padding: 6px 12px; font-size: 12px; border: 1px solid #E8ECF0; border-radius: 6px; background: white; cursor: pointer;">🔄 강제 리로드</button>
     </div>
   </div>
 
